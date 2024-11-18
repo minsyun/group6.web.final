@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f2;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question label {
+            display: block;
+            margin: 5px 0;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #6b4f4f;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .result {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .result p {
+            font-size: 1.2em;
+        }
+        .home-btn {
+            position: absolute;
+            top: 5px;
+            left: 30px;
+            width: 50px; /* 圖片的寬度 */
+            height: 50px; /* 圖片的高度 */
+            cursor: pointer;
+            border: none; /* 去掉按鈕邊框 */
+            background: none; /* 清除背景色 */
+        }
+        .home-btn img {
+            width: 100%; /* 圖片填滿按鈕 */
+            height: auto;
+        }
+        .menu-btn{
+            position: absolute;
+            bottom :20px;
+            right: 30px;
+            width: 75px;  
+            height: 75px;  
+            background: #6b4f4f;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%; 
+            object-fit: cover; 
+        }
+        /*
+        .menu-btn {
+            position: absolute;
+            bottom :20px;
+            right: 10px;
+            width: 75px; /*圖片的寬度 
+            height: 50px; /* 圖片的高度 
+            cursor: pointer;
+            border-radius: 50%; /* 將圖片的邊框半徑設為50%即可變為圓形 
+            object-fit: cover; /* 確保圖片內容不變形 
+        }
+        
+        .menu-btn img {
+            width: 100%; /* 圖片填滿按鈕 
+            height: auto;
+            border-radius: 50%; 
+            object-fit: cover; 
+        }
+            */      
+    </style>
+</head>
+<body>
+    <!-- 結果頁面的標題 -->
+    <h1 id="resultTitle" style="display: none;">提交標題(要記得取名)</h1>
+    <div class="container">
+        <!-- 問題頁面的標題 -->
+        <h1 id="quizTitle">Coffee Flavor Quiz</h1>
+
+        <form id="quizForm">
+            <button type="button" class="btn" onclick="submitQuiz()">提交</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;">
+            <h2 id="resultName" >結果名稱</h2>
+            <img src="data:image/jpeg;base64,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"
+            title="結果名稱"/>
+            <p>
+                我們推薦...(簡介)
+            </p>
+            <!--<p id="recommendation"></p>--> 
+            <button class="btn" onclick="restartQuiz()">重新測驗</button>
+            <button class="btn home-btn" onclick="window.location.href='home.html'">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNg1GoAaNDSRfd5kDEpBmE7TSU-dUkMpf0eA&s"/>
+            </button>
+            <button class="btn menu-btn" onclick="window.location.href='menu.html'">Menu</button>
+        </div> 
+        
+    </div>
+    <script>
+        function submitQuiz() {
+            // 獲取表單數據
+            const form = document.getElementById('quizForm');
+            const formData = new FormData(form);
+            let score = 0;
+
+            for (let [key, value] of formData.entries()) {
+                score += parseInt(value);
+            }
+
+            // 根據分數生成推薦結果
+            let recommendation = '';
+            if (score <= 5) {
+                recommendation = '我們推薦你試試拿鐵咖啡！';
+            } else if (score <= 8) {
+                recommendation = '我們推薦你試試美式咖啡！';
+            } else {
+                recommendation = '我們推薦你試試義式濃縮！';
+            }
+
+            // 顯示結果
+            document.getElementById('quizTitle').style.display = 'none';
+            document.getElementById('quizForm').style.display = 'none';
+            document.getElementById('resultTitle').style.display = 'block';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('recommendation').textContent = recommendation;
+            document.getElementById('resultName').style.display = 'block';
+        }
+        // 重置表單和結果
+        function restartQuiz() {
+            document.getElementById('quizTitle').style.display = 'block';
+            document.getElementById('resultTitle').style.display = 'none';
+            document.getElementById('quizForm').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('resultName').style.display = 'none';
+            document.getElementById('quizForm').reset();
+        }
+    </script>
+</body>
+</html>
